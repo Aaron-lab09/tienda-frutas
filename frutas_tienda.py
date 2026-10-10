@@ -1,6 +1,15 @@
+import json
+from datetime import datetime
+import os
+if os.path.exists("catalogo.json"):
+    with open("catalogo.json", "r", encoding="utf-8") as f:
+        catalogo = json.load(f)
+else:
+    catalogo = {"manzanas": 15, "cambures": 20, "naranjas": 15, "peras": 10, "uvas": 25}
+
+
 carrito = {}
-producto_frutas = {"manzanas": 15, "cambures": 20, "naranjas": 15, "peras": 20, "uvas": 25}
-preguntas = ["Agregar producto", "Ver carrito", "Finalizar compra"]
+preguntas = ["agregar producto", "ver carrito", "finalizar compra"]
 
 
 def numero_entero_positivo(mensaje):
@@ -8,27 +17,18 @@ def numero_entero_positivo(mensaje):
         respuesta = input(mensaje)
         if respuesta.isdigit() and int(respuesta) > 0:
             return int(respuesta)
-        print("Debe ingresar un número positivo")
-
-
-def pregunta_sn(texto):
-    while True:
-        respuesta = input(f"{texto}? (si/no): ").lower()
-        if respuesta == 'si' or respuesta == 'no':
-            return respuesta
-        else:
-            print("Respuesta invalida (debe responder si o no)")
+        print("debe ingresar un numero positivo")
 
 
 def agregar_producto(carrito):
     while True:
-        producto_comprar = input("Qué le gustaria agregar al carrito?: ").lower()
-        if producto_comprar not in producto_frutas:
-            print(f"Disculpa, pero no tenemos {producto_comprar} en stock")
-        else:
-            cantidad_producto = numero_entero_positivo(f"Cuántas {producto_comprar} desea llevar?: ")
+        producto_comprar = input("que le gustaria agregar al carrito?: ").lower()
+        if producto_comprar not in catalogo:
+            print(f"disculpa, pero no tenemos {producto_comprar} en stock")
+        else: 
+            cantidad_producto = numero_entero_positivo(f"cuantas {producto_comprar} desea llevar?: ")
             carrito[producto_comprar] = carrito.get(producto_comprar, 0) + cantidad_producto
-            respuesta2 = pregunta_sn("Desea agregar otro producto")
+            respuesta2 = pregunta_sn("desea agregar otro producto")
             if respuesta2 != "si":
                 break
 
@@ -36,51 +36,80 @@ def agregar_producto(carrito):
 def ver_carrito(carrito):
     while True:
         if not carrito:
-            print("No tienes nada en el carrito")
+            print("no tienes nada en el carrito")
             break
         else:
-            print("En el carrito tienes:")
+            print("en el carrito tienes:")
             for producto, cantidad in carrito.items():
                 print(f"{producto}: {cantidad}")
-            pregunta_delete = pregunta_sn("Quisieras quitar algún producto")
+            pregunta_delete = pregunta_sn("quisieras quitar algun producto")
             if pregunta_delete != "si":
                 break
             else:
                 respuesta_delete = "si"
                 while respuesta_delete == "si":
-                    producto_delete = input("Qué quisiera quitar del carrito?: ").lower()
+                    producto_delete = input("que quisiera quitar del carrito?: ").lower()
                     if producto_delete not in carrito:
-                        print(f"No tienes {producto_delete} en el carrito")
+                        print(f"no tienes {producto_delete} en el carrito")
                         continue
                     else:
-                        cantidad_delete = numero_entero_positivo(f"Cuántas {producto_delete} quisiera quitar?: ")
+                        cantidad_delete = numero_entero_positivo(f"cuantas {producto_delete} quisiera quitar?: ")
                         if cantidad_delete >= carrito[producto_delete]:
                             del carrito[producto_delete]
-                            print(f"Las {producto_delete} han sido eliminadas del carrito")
+                            print(f"{producto_delete} ha sido eliminado del carrito")
                         else:
                             carrito[producto_delete] -= cantidad_delete
-                            print(f"Sacaste {cantidad_delete} {producto_delete} del carrito")
-                        respuesta_delete = pregunta_sn("Desea quitar algo mas")
-                        if respuesta_delete == "si":
+                            print(f"sacaste {cantidad_delete} {producto_delete} del carrito")
+                        respuesta_delete = pregunta_sn("desea quitar algo mas")
+                        if respuesta_delete =="si":
                             continue
                         else:
                             break
 
 
-def finalizar_compra(carrito):
-    factura_total = 0
-    for producto, cantidad in carrito.items():
-        subtotal = producto_frutas[producto] * cantidad
-        factura_total += subtotal
-        print(f"{producto}: {cantidad} X {producto_frutas[producto]} = {subtotal}")
-    print(f"El total sería de {factura_total}Bs")
-    if factura_total >= 100:
-        descuento = factura_total * 0.1
-        print(f"Su total sería de {factura_total}, pero como su compra supera los 100bs, le aplicaremos un 10% de descuento ({descuento}bs), con lo cual le quedaría en {factura_total * 0.9}bs")
+def pregunta_sn(texto):
+    while True:
+        respuesta = input(f"{texto}? (si/no): ").lower()
+        if respuesta=='si' or respuesta=='no':
+            return respuesta
+        else:
+            print("respuesta invalida (debe responder si o no)")
 
+
+def finalizar_compra(carrito):
+    datos_factura = [f"[{datetime.now():%Y-%m-%d %H:%M}]"]
+
+    if not carrito:
+        print("No lleva nada en el carrito")
+        if pregunta_sn("Le gustaria volver y meter algo al carrito") == "si":
+            return False      
+        datos_factura.append("No hay nada que facturar")
+    else:
+        factura_total = 0
+        for producto, cantidad in carrito.items():
+            subtotal = catalogo[producto] * cantidad
+            factura_total += subtotal
+            datos_factura.append(f"- {producto}: {cantidad} x {catalogo[producto]} = {subtotal}Bs")
+            print(f"{producto}: {cantidad} X {catalogo[producto]} = {subtotal}Bs")
+
+        print(f"El total sería de {factura_total}Bs")
+        if factura_total >= 100:
+            descuento = factura_total * 0.1
+            total_final = factura_total * 0.9
+            print(f"Descuento del 10% ({descuento}Bs). Total: {total_final}Bs")
+            datos_factura.append(f"Serían {factura_total}Bs menos el descuento de {descuento}Bs: total {total_final}Bs")
+        else:
+            datos_factura.append(f"Su total sería de: {factura_total}Bs")
+
+    with open("facturas.txt", "a", encoding="utf-8") as f:   
+        f.write("\n".join(datos_factura) + "\n\n")
+
+    return True     
+
+        
 
 while True:
-    print("Qué quieres hacer?: ")
+    print("que quieres hacer?: ")
     for n, opciones in enumerate(preguntas, start=1):
         print(f"{n}. {opciones}")
     resp = input()
@@ -90,7 +119,7 @@ while True:
         case "2":
             ver_carrito(carrito)
         case "3":
-            finalizar_compra(carrito)
-            break
+            if finalizar_compra(carrito):
+                break
         case _:
             print("Esa opción no es válida")
