@@ -1,0 +1,13 @@
+[2026-10-13 12:04]
+- manzanas: 5 x 15 = 75Bs
+Su total sería de: 75Bs
+
+[2026-10-13 12:05]
+- manzanas: 4 x 15 = 60Bs
+Su total sería de: 60Bs
+
+[2026-10-13 12:24]
+- uvas: 5 x 25 = 125Bs
+- manzanas: 3 x 15 = 45Bs
+Serían 170Bs menos el descuento de 17.0Bs: total 153.0Bs
+
