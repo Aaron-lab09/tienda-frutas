@@ -1,11 +1,18 @@
 import json
 from datetime import datetime
 import os
+from rich.console import Console
+from rich.table import Table
+
+
 if os.path.exists("catalogo.json"):
     with open("catalogo.json", "r", encoding="utf-8") as f:
         catalogo = json.load(f)
 else:
     catalogo = {"manzanas": 15, "cambures": 20, "naranjas": 15, "peras": 10, "uvas": 25}
+
+
+console = Console()
 
 
 carrito = {}
@@ -39,9 +46,12 @@ def ver_carrito(carrito):
             print("No tienes nada en el carrito")
             break
         else:
-            print("En el carrito tienes:")
+            tabla2 = Table(title="Carrito")
+            tabla2.add_column("Productos", style= "bold blue")
+            tabla2.add_column("Cantidad", style="yellow", justify="right")
             for producto, cantidad in carrito.items():
-                print(f"{producto}: {cantidad}")
+                tabla2.add_row(producto, str(cantidad))
+            console.print(tabla2)
             pregunta_delete = pregunta_sn("Quisieras quitar algún producto")
             if pregunta_delete != "si":
                 break
@@ -79,24 +89,30 @@ def pregunta_sn(texto):
 def finalizar_compra(carrito):
     datos_factura = [f"[{datetime.now():%Y-%m-%d %H:%M}]"]
     factura_total = 0
-
+    
     if not carrito:
         print("No lleva nada en el carrito")
         if pregunta_sn("Le gustaria volver y meter algo al carrito") == "si":
             return False
         datos_factura.append("No hay nada que facturar")
     else:
+        tabla3 = Table(title="Factura")
+        tabla3.add_column("Producto", style="blue")
+        tabla3.add_column("Cantidad", style="yellow", justify="right")
+        tabla3.add_column("Subtotal", style="green", justify="right")
         for producto, cantidad in carrito.items():
             subtotal = catalogo[producto] * cantidad
             factura_total += subtotal
             datos_factura.append(f"- {producto}: {cantidad} x {catalogo[producto]} = {subtotal}Bs")
-            print(f"{producto}: {cantidad} X {catalogo[producto]} = {subtotal}Bs")
-        print(f"El total sería de {factura_total}Bs")
+            tabla3.add_row(producto, str(cantidad), str(subtotal))
+        console.print(tabla3)
+        console.print(f"[bold]Su total sería de [underline][red]{factura_total}Bs[/][/][/]")
         if factura_total >= 100:
             descuento = factura_total * 0.1
             total_final = factura_total * 0.9
-            print(f"Descuento del 10% ({descuento}Bs). Total: {total_final}Bs")
-            datos_factura.append(f"Serían {factura_total}Bs menos el descuento de {descuento}Bs: total {total_final}Bs")
+            console.print(f"[white]Junto con el descuento del [underline][bold]10%[/][/] ({descuento}Bs).[/]")
+            console.print(f"[bold]Su total final sería de: [underline][red]{total_final}Bs[/][/][/]")
+            datos_factura.append(f"{factura_total}Bs - Descuento del 10% ({descuento})Bs: Total {total_final}Bs")
         else:
             datos_factura.append(f"Su total sería de: {factura_total}Bs")
 
@@ -105,7 +121,16 @@ def finalizar_compra(carrito):
 
     return True
 
-        
+#tabla de catálogo
+
+tabla = Table(title="Catálogo")
+tabla.add_column("Producto", style="blue")
+tabla.add_column("Precio", style="green", justify="right")
+for producto, precio in catalogo.items():
+    tabla.add_row(producto, str(precio))
+console.print(tabla)
+
+#menú y opciones
 
 while True:
     print("Qué quieres hacer?: ")
