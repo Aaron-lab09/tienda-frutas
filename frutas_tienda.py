@@ -47,7 +47,7 @@ def ver_carrito(carrito):
             break
         else:
             tabla2 = Table(title="Carrito")
-            tabla2.add_column("Productos", style= "bold blue")
+            tabla2.add_column("Productos", style= "blue")
             tabla2.add_column("Cantidad", style="yellow", justify="right")
             for producto, cantidad in carrito.items():
                 tabla2.add_row(producto, str(cantidad))
